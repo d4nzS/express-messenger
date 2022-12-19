@@ -18,7 +18,7 @@ app.use((req, res, next) => {
 
 app.use('/feed', feedRoutes);
 
-mongoose.connect('mongodb+srv://root:root@cluster0.2oyeaqc.mongodb.net/?retryWrites=true&w=majority')
+mongoose.connect('mongodb+srv://root:root@cluster0.2oyeaqc.mongodb.net/messages')
   .then(() => app.listen(8080))
   .catch(err => console.log(err));
 
