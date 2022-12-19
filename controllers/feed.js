@@ -2,6 +2,7 @@ const { validationResult } = require('express-validator');
 
 const Post = require('../models/post');
 const ApiError = require('../exceptions/api-error');
+const clearImage = require('../utils/clear-image');
 
 exports.getPosts = async (req, res, next) => {
   try {
@@ -56,14 +57,58 @@ exports.getPost = async (req, res, next) => {
     const post = await Post.findById(postId);
 
     if (!post) {
-      next(ApiError.NotFound('Could not find a post.'));
+      return next(ApiError.NotFound('Could not find a post.'));
     }
 
     res.status(200).json({
       message: 'Post fetched!',
       post
     });
-  } catch(err) {
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updatePost = async (req, res, next) => {
+  const postId = req.params.postId;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return next(ApiError.UnprocessableEntity('Validation failed, entered data is incorrect.'));
+  }
+
+  const { title, content } = req.body;
+  const imageUrl = req.file
+    ? req.file.path.replace('\\', '/')
+    : req.body.image;
+
+  if (!imageUrl) {
+    return next(ApiError.UnprocessableEntity('No image provided.'));
+  }
+
+  try {
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return next(ApiError.NotFound('Could not find a post.'));
+    }
+
+    if (imageUrl !== post.imageUrl) {
+      clearImage(post.imageUrl);
+    }
+
+    post.title = title;
+    post.content = content;
+    post.imageUrl = imageUrl;
+
+    await post.save();
+
+    res.status(200).json({
+      message: 'Post updated!',
+      post
+    });
+  } catch (err) {
     next(err);
   }
 };
