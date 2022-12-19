@@ -5,6 +5,10 @@ class ApiError extends Error{
     this.statusCode = statusCode;
   }
 
+  static NotFound(message) {
+    return new this(message, 404);
+  }
+
   static UnprocessableEntity(message) {
     return new this(message, 422);
   }

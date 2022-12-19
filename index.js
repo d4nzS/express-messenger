@@ -32,7 +32,7 @@ app.use((error, req, res, next) => {
   }
 
   res.status(500).json({
-    message: 'Unexpected error'
+    message: 'Unexpected error.'
   })
 });
 
