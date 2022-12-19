@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
 const feedRoutes = require('./routes/feed');
+const ApiError = require('./exceptions/api-error');
 
 const app = express();
 
@@ -20,6 +21,20 @@ app.use((req, res, next) => {
 });
 
 app.use('/feed', feedRoutes);
+
+app.use((error, req, res, next) => {
+  console.log(error);
+
+  if (error instanceof ApiError) {
+    return res.status(error.statusCode).json({
+      message: error.message
+    });
+  }
+
+  res.status(500).json({
+    message: 'Unexpected error'
+  })
+});
 
 mongoose.connect('mongodb+srv://root:root@cluster0.2oyeaqc.mongodb.net/messages')
   .then(() => app.listen(8080))
