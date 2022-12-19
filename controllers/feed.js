@@ -17,18 +17,23 @@ exports.getPosts = async (req, res, next) => {
 };
 
 exports.createPost = async (req, res, next) => {
-  const { title, content } = req.body;
-
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    next(ApiError.UnprocessableEntity('Validation failed, entered data is incorrect.'));
+    return next(ApiError.UnprocessableEntity('Validation failed, entered data is incorrect.'));
   }
+
+  if (!req.file) {
+    return next(ApiError.UnprocessableEntity('No image provided.'));
+  }
+
+  const { title, content } = req.body;
+  const imageUrl = req.file.path.replace('\\', '/');
 
   const post = new Post({
     title,
     content,
-    imageUrl: 'images/duck.jpg',
+    imageUrl,
     creator: { name: 'Denis' },
   });
 
