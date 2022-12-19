@@ -112,3 +112,25 @@ exports.updatePost = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.deletePost = async (req, res, next) => {
+  const postId = req.params.postId;
+
+  try {
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return next(ApiError.NotFound('Could not find a post.'));
+    }
+
+    clearImage(post.imageUrl);
+
+    await Post.findByIdAndDelete(postId);
+
+    res.status(200).json({
+      message: 'Deleted post!'
+    });
+  } catch (err) {
+    next(err);
+  }
+};
