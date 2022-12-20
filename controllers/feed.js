@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 
 const Post = require('../models/post');
+const User = require('../models/user');
 const ApiError = require('../exceptions/api-error');
 const clearImage = require('../utils/clear-image');
 
@@ -44,15 +45,25 @@ exports.createPost = async (req, res, next) => {
     title,
     content,
     imageUrl,
-    creator: { name: 'Denis' },
+    creator: req.userId,
   });
 
   try {
     await post.save()
 
+    const user = await User.findById(req.userId);
+
+    user.posts.push(post);
+
+    await user.save();
+
     res.status(201).json({
       message: 'Post created successfully!',
-      post
+      post,
+      creator: {
+        _id: user._id.toString(),
+        name: user.name
+      }
     });
   } catch (err) {
     next(err);
