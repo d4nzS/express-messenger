@@ -65,3 +65,47 @@ exports.login = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getUserStatus = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      return next(ApiError.NotFound('User not found.'));
+    }
+
+    res.status(200).json({
+      status: user.status
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateUserStatus = async (req, res, next) => {
+  const newStatus = req.body.status;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return next(ApiError.UnprocessableEntity('Validation failed.', errors.array()));
+  }
+
+  try {
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      return next(ApiError.NotFound('User not found.'));
+    }
+
+    user.status = newStatus;
+
+    await user.save();
+
+    res.status(200).json({
+      message: 'User updated!'
+    });
+  } catch (err) {
+    next(err);
+  }
+};
