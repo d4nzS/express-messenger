@@ -32,3 +32,21 @@ exports.signup = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.login = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return next(ApiError.Unauthorized('A user with this email could not be found.'));
+    }
+
+    if (!await bcrypt.compare(password, user.password)) {
+      return next(ApiError.Unauthorized('Wrong password.'));
+    }
+  } catch (err) {
+    next(err);
+  }
+};

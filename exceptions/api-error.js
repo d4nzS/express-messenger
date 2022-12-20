@@ -6,6 +6,10 @@ class ApiError extends Error{
     this.data = data;
   }
 
+  static Unauthorized(message) {
+    return new this(message, 401);
+  }
+
   static NotFound(message) {
     return new this(message, 404);
   }
