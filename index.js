@@ -50,13 +50,14 @@ app.use((error, req, res, next) => {
 
   if (error instanceof ApiError) {
     return res.status(error.statusCode).json({
-      message: error.message
+      message: error.message,
+      data: error.data
     });
   }
 
   res.status(500).json({
     message: 'Unexpected error.'
-  })
+  });
 });
 
 mongoose.connect('mongodb+srv://root:root@cluster0.2oyeaqc.mongodb.net/messages')

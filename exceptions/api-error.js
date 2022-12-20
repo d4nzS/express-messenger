@@ -1,5 +1,5 @@
 class ApiError extends Error{
-  constructor(message, statusCode) {
+  constructor(message, statusCode, data) {
     super(message);
 
     this.statusCode = statusCode;
@@ -9,8 +9,8 @@ class ApiError extends Error{
     return new this(message, 404);
   }
 
-  static UnprocessableEntity(message) {
-    return new this(message, 422);
+  static UnprocessableEntity(message, data) {
+    return new this(message, 422, data);
   }
 }
 
