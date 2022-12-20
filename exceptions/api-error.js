@@ -10,6 +10,10 @@ class ApiError extends Error{
     return new this(message, 401);
   }
 
+  static Forbidden(message) {
+    return new this(message, 403);
+  }
+
   static NotFound(message) {
     return new this(message, 404);
   }

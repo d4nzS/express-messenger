@@ -114,6 +114,10 @@ exports.updatePost = async (req, res, next) => {
       return next(ApiError.NotFound('Could not find a post.'));
     }
 
+    if (post.creator.toString() !== req.userId) {
+      return next(ApiError.Forbidden('Not authorized.'));
+    }
+
     if (imageUrl !== post.imageUrl) {
       clearImage(post.imageUrl);
     }
@@ -143,9 +147,19 @@ exports.deletePost = async (req, res, next) => {
       return next(ApiError.NotFound('Could not find a post.'));
     }
 
+    if (post.creator.toString() !== req.userId) {
+      return next(ApiError.Forbidden('Not authorized.'));
+    }
+
     clearImage(post.imageUrl);
 
     await Post.findByIdAndDelete(postId);
+
+    const user = await User.findById(req.userId);
+
+    user.posts.pull(postId);
+
+    await user.save();
 
     res.status(200).json({
       message: 'Deleted post!'
