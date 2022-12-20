@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 const ApiError = require('../exceptions/api-error');
@@ -46,6 +47,20 @@ exports.login = async (req, res, next) => {
     if (!await bcrypt.compare(password, user.password)) {
       return next(ApiError.Unauthorized('Wrong password.'));
     }
+
+    const token = jwt.sign(
+      {
+        email,
+        userId: user._id.toString()
+      },
+      'secret',
+      { expiresIn: '1h' }
+    );
+
+    res.status(200).json({
+      token,
+      userId: user._id.toString()
+    });
   } catch (err) {
     next(err);
   }
