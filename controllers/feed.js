@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 
+const io = require('../socket');
 const Post = require('../models/post');
 const User = require('../models/user');
 const ApiError = require('../exceptions/api-error');
@@ -14,6 +15,7 @@ exports.getPosts = async (req, res, next) => {
 
     const posts = await Post
       .find()
+      .populate('creator')
       .skip((currentPage - 1) * perPage)
       .limit(perPage);
 
@@ -56,6 +58,11 @@ exports.createPost = async (req, res, next) => {
     user.posts.push(post);
 
     await user.save();
+
+    io.getIO().emit('posts', {
+      action: 'create',
+      post: { ...post, creator: { _id: req.userId, name: user.name } }
+    });
 
     res.status(201).json({
       message: 'Post created successfully!',
