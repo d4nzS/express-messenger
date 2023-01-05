@@ -64,16 +64,11 @@ mongoose.connect('mongodb+srv://root:root@cluster0.2oyeaqc.mongodb.net/messages'
   .then(() => {
     const server = app.listen(8080);
 
-    const io = require('socket.io')(server, {
-      cors: {
-        origin: 'http://localhost:3000',
-        credentials: true
-      }
-    });
+    const io = require('./socket').init(server);
 
     io.on('connection', () => {
       console.log('Client connected!');
-    })
+    });
   })
   .catch(err => console.log(err));
 
