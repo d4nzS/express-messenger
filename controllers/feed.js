@@ -115,7 +115,7 @@ exports.updatePost = async (req, res, next) => {
   }
 
   try {
-    const post = await Post.findById(postId);
+    const post = await Post.findById(postId).populate('creator');
 
     if (!post) {
       return next(ApiError.NotFound('Could not find a post.'));
@@ -134,6 +134,8 @@ exports.updatePost = async (req, res, next) => {
     post.imageUrl = imageUrl;
 
     await post.save();
+
+    io.getIO().emit('posts', { action: 'update', post });
 
     res.status(200).json({
       message: 'Post updated!',
