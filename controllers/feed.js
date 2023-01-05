@@ -62,7 +62,7 @@ exports.createPost = async (req, res, next) => {
 
     io.getIO().emit('posts', {
       action: 'create',
-      post: { ...post, creator: { _id: req.userId, name: user.name } }
+      post: { ...post._doc, creator: { _id: req.userId, name: user.name } }
     });
 
     res.status(201).json({
@@ -122,7 +122,7 @@ exports.updatePost = async (req, res, next) => {
       return next(ApiError.NotFound('Could not find a post.'));
     }
 
-    if (post.creator.toString() !== req.userId) {
+    if (post.creator._id.toString() !== req.userId) {
       return next(ApiError.Forbidden('Not authorized.'));
     }
 
@@ -170,6 +170,8 @@ exports.deletePost = async (req, res, next) => {
     user.posts.pull(postId);
 
     await user.save();
+
+    io.getIO().emit('posts', { action: 'delete', post: postId });
 
     res.status(200).json({
       message: 'Deleted post!'
